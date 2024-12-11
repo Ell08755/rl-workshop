@@ -20,3 +20,6 @@ simulations/
 analyses/
 backup/
 01_RLintro_answer.ipynb
+03DQN/
+04ModelPlan/
+05PolicyGradient/
