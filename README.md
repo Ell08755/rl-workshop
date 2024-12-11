@@ -1,14 +1,16 @@
-# Tutorials for advanced cognitive computational neuroscience
-
+# RL workshop tutorial
 
 
 Contributor:
 
-Zeming Fang, fangzefunny@gmail.com
+Zeming Fang, zemingfang11@gmail.com
 
 Ru-Yuan Zhang, ruyuanzhang@gmail.com
 
 Jieying Zhang,
+
+## Getting started
+
 
 
 
