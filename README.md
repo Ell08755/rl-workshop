@@ -11,8 +11,18 @@ Jieying Zhang,
 
 ## Getting started
 
-
-
+Create a virtual environment
+```
+conda create --name rlworkshop python=3.10
+```
+Activate the environment
+```
+conda activate rlworkshop
+```
+Install the dependencies
+```
+pip install -r requirements.txt
+```
 
 ## TOC
 
