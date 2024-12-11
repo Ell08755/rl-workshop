@@ -1,15 +1,19 @@
 # RL workshop tutorial
 
 
-Contributor:
+Repo contributors:
 
 Zeming Fang, zemingfang11@gmail.com
 
 Ru-Yuan Zhang, ruyuanzhang@gmail.com
 
-Jieying Zhang,
+Jieying Zhang, jieying.zhang@student.uva.nl
+
 
 ## Getting started
+
+Install [Anaconda](https://www.anaconda.com/download/) for later python installation. 
+Open the Terminal (for windows user, please use git bash). 
 
 Create a virtual environment
 ```
