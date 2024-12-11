@@ -33,11 +33,12 @@ class viz:
 
     # -----------  Colormap ------------- 
 
-    BluePalette   = [dBlue, Blue, lBlue]
-    RedPalette    = [dRed, Red, lRed]
-    YellowPalette = [dYellow, Yellow, lYellow]
+    GreensMap = matplotlib.colors.LinearSegmentedColormap.from_list(
+            'vizReds',    [lGreen, Green])
     RedsMap = matplotlib.colors.LinearSegmentedColormap.from_list(
-            'vizReds',    [lRed, dRed])
+            'vizReds',    [lRed,   Red])
+    BluesMap = matplotlib.colors.LinearSegmentedColormap.from_list(
+            'vizReds',    [lBlue,  Blue])
     mixMap = matplotlib.colors.LinearSegmentedColormap.from_list(
             'vizMix',   [np.array([1]*3), lBlue, Blue, np.array([0]*3)])
 

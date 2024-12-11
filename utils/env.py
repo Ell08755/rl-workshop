@@ -7,6 +7,11 @@ import seaborn as sns
 
 from .viz import viz
 
+################################################
+#                                              #
+#         THE FROZEN LAKE ENVIRONMENT          # 
+#                                         @ZF  #
+################################################
 
 layout = [
     "S.......",
@@ -18,7 +23,6 @@ layout = [
     ".H..H.H.",
     "...H...G"
 ]
-
 
 class frozen_lake:
     n_row = 8
@@ -96,6 +100,8 @@ class frozen_lake:
         def p_s_next(s, a):
             p_next = np.zeros([self.nS])
             cell = self.state2cell(s)
+            # if the current state is terminal state
+            # state in the current state 
             if s in self.s_termination:
                 p_next[s] = 1 
             else:
@@ -103,9 +109,12 @@ class frozen_lake:
                     s_next = self.cell2state(
                         np.clip(cell + self.directs[j],
                         0, frozen_lake.n_row-1))
-                    
-                    # add probability 
-                    if j == a:
+                    # the agent is walking on a surface of frozen ice, they cannot always
+                    # successfully perform the intended action. For example, attempting to move "left"
+                    # may result in the agent moving to the left with a probability of 1-ε.
+                    # With probability ε, the agent will randomly move in one of the 
+                    # other possible directions.
+                    if j == a: 
                         p_next[s_next] += 1-self.eps
                     else:
                         p_next[s_next] += self.eps / (self.nA-1)
@@ -130,9 +139,11 @@ class frozen_lake:
                 return 0, False
         self.r = R
         
-    # ------------ visualize the environment ----------- #
-
     def reset(self):
+        '''Reset the environment
+
+            Bring the agent back to the starting point
+        '''
         self.curr_cell = np.hstack(np.where(np.array([list(row) 
                         for row in self.layout])=='S'))
         self.state = self.cell2state(self.curr_cell)
@@ -140,9 +151,11 @@ class frozen_lake:
         self.act = None
 
         return self.state, None, self.done 
+    
+    # ------------ visualize the environment ----------- #
 
     def render(self, ax):
-        '''Visualize the figure
+        '''Visualize the current environment
         '''
         occupancy = np.array(self.occupancy)
         sns.heatmap(occupancy, cmap=viz.mixMap, ax=ax,
@@ -162,7 +175,9 @@ class frozen_lake:
         ax.set_box_aspect(1)
 
     def show_pi(self, ax, pi):
-        self.reset()
+        '''Visualize your policy π(a|s)
+        '''
+        #self.reset()
         self.render(ax)
         for s in self.S:
             if s not in self.s_termination:
@@ -175,6 +190,8 @@ class frozen_lake:
         ax.set_title('Policy')
 
     def show_v(self, ax, V):
+        '''Visualize the value V(s) for each state given a policy
+        '''
         v_mat = V.reshape([frozen_lake.n_row, frozen_lake.n_col])
         sns.heatmap(v_mat, cmap=viz.RedsMap, ax=ax,
                     lw=.5, linecolor=[.9]*3, cbar=False)
@@ -192,9 +209,12 @@ class frozen_lake:
         ax.set_title('Value')
         ax.set_axis_off()
         ax.set_box_aspect(1)
+
+    # ------------ interact with the environment ----------- #
     
     def step(self, act):
-        # get the next state 
+        '''Update the state of the environment
+        '''
         p_s_next = self.p_s_next(self.state, act)
         self.state = self.rng.choice(self.S, p=p_s_next)
         self.curr_cell = self.state2cell(self.state)
