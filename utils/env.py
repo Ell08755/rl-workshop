@@ -182,11 +182,13 @@ class frozen_lake:
         for s in self.S:
             if s not in self.s_termination:
                 cell = self.state2cell(s)
-                a = pi[s].argmax()
-                next_cell = self.directs[a]*.25
-                ax.arrow(cell[1]+.5, cell[0]+.5, 
-                        next_cell[1], next_cell[0],
-                        width=.01, color='k')
+                for a in self.A:
+                    pa = pi[s, a]
+                    if pa > 0:
+                        next_cell = self.directs[a]*.25
+                        ax.arrow(cell[1]+.5, cell[0]+.5, 
+                                next_cell[1]*pa, next_cell[0]*pa,
+                                width=.005, color='k')
         ax.set_title('Policy')
 
     def show_v(self, ax, V):
