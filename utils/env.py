@@ -28,13 +28,14 @@ class frozen_lake:
     n_row = 8
     n_col = 8
 
-    def __init__(self, layout=layout, eps=.2, seed=1234):
+    def __init__(self, layout=layout, eps=.2, seed=1234, Rscale=1):
 
         # get occupancy 
         self.rng = np.random.RandomState(seed)
         self.layout = layout
         self.get_occupancy()
         self.eps = eps 
+        self.Rscale = Rscale
         # define MDP 
         self._init_S()
         self._init_A()
@@ -132,7 +133,7 @@ class frozen_lake:
         '''
         def R(s):
             if s == self.goal_state:
-                return 1, True
+                return 1*self.Rscale, True
             elif s in self.hole_states:
                 return -1, True
             else:
@@ -154,7 +155,7 @@ class frozen_lake:
     
     # ------------ visualize the environment ----------- #
 
-    def render(self, ax):
+    def render(self, ax, epi=False, step=False):
         '''Visualize the current environment
         '''
         occupancy = np.array(self.occupancy)
@@ -170,7 +171,8 @@ class frozen_lake:
         ax.text(self.curr_cell[1]+.25, self.curr_cell[0]+.75, 'O', color=viz.Red,
                     fontweight='bold', fontsize=10)
         r, _ = self.r(self.state)
-        ax.set_title(f'Reward: {r}, done: {self.done}')
+        title = f'Episode: {epi}, Step: {step}' if epi else f'Reward: {r}, done: {self.done}' 
+        ax.set_title(title)
         ax.set_axis_off()
         ax.set_box_aspect(1)
 
