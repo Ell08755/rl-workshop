@@ -33,3 +33,16 @@ pip install -r requirements.txt
 1. Intro to RL 
    * Policy evaluation
 
+
+2. Dynamic Programming and Monte Carlo Methods
+   * Policy improvment
+   * Value iteration
+   * Monte Carlo prediction
+     
+3. Temporal Difference Methods
+   * Monte Carlo control
+   * Sarsa
+   * Q-learning
+  
+  
+
