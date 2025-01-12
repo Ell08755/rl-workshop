@@ -30,16 +30,17 @@ pip install -r requirements.txt
 
 ## TOC
 
-1. Intro to RL 
+1. Intro to RL
+   * Frozen lake environment
    * Policy evaluation
 
 
-2. Dynamic Programming and Monte Carlo Methods
+3. Dynamic Programming and Monte Carlo Methods
    * Policy improvment
    * Value iteration
    * Monte Carlo prediction
      
-3. Temporal Difference Methods
+4. Temporal Difference Methods
    * Monte Carlo control
    * Sarsa
    * Q-learning
