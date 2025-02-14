@@ -225,7 +225,97 @@ class frozen_lake:
         rew, self.done = self.r(self.state)
         self.act = None 
         return self.state, rew, self.done
+
+class cart_pole:
+
+    def __init__(self, seed=1234, dt=0.02, gravity=9.8, mass_cart=1.0, mass_pole=0.1, length=0.7, force_mag=10.0, tau=0.02):
+        np.random.seed(seed)
+        # Physical constants
+        self.dt = dt                # time step (s)
+        self.gravity = gravity      # gravitational constant
+        self.mass_cart = mass_cart  # mass of the cart (kg)
+        self.mass_pole = mass_pole  # mass of the pole (kg)
+        self.length = length        # length of the pole (m)
+        self.force_mag = force_mag  # maximum magnitude of the force (N)
+        self.tau = tau  # time interval for the simulation (s)
+
+        # State variables
+        self.state = np.zeros(4)  # [x, x_dot, theta, theta_dot]
+        self.nS = 4
+        
+        # The action space is continuous: force magnitude between -1 and 1
+        # We will apply the action to force the cart to move
+        self.action_space = (-1.0, 1.0)
+        
+    def reset(self):
+        # Reset the state to a random initial position and velocity
+        self.state = np.random.uniform(low=-0.05, high=0.05, size=4)  # Random initial state
+        return np.copy(self.state), 0, False
     
+    def step(self, action):
+        # Extract state variables
+        x, x_dot, theta, theta_dot = self.state
+        
+        # Apply the continuous action (force between -1 and 1)
+        force = action * self.force_mag
+        
+        # Physics equations of motion
+        # Based on the linearized equations of the cart-pole system
+        cos_theta = np.cos(theta)
+        sin_theta = np.sin(theta)
+        total_mass = self.mass_cart + self.mass_pole
+        pole_mass_length = self.mass_pole * self.length
+        
+        # Equations of motion
+        temp = (force + pole_mass_length * theta_dot**2 * sin_theta) / total_mass
+        theta_acc = (self.gravity * sin_theta - cos_theta * temp) / (self.length * (4/3 - self.mass_pole * cos_theta**2 / total_mass))
+        x_acc = temp - pole_mass_length * theta_acc * cos_theta / total_mass
+        
+        # Update the state using Euler's method
+        x += self.dt * x_dot
+        x_dot += self.dt * x_acc
+        theta += self.dt * theta_dot
+        theta_dot += self.dt * theta_acc
+        
+        # Update the state
+        self.state = np.array([x, x_dot, theta, theta_dot])
+        
+        # Check if the pole has fallen
+        done = bool(theta < -np.pi/2 or theta > np.pi/2 or x < -2.4 or x > 2.4)
+        
+        # Reward: 1 for each time step the pole is balanced
+        reward = 1.0
+        
+        return np.copy(self.state), reward, done
+    
+    def render(self, ax):
+        # Visualization of the cart-pole system
+        x, _, theta, _ = self.state
+        cart_x = x
+        pole_length = self.length
+        pole_x = cart_x + pole_length * np.sin(theta)
+        pole_y = pole_length * np.cos(theta)
+                
+        # Draw the cart
+        cart_width = 0.3
+        cart_height = 0.24
+        ax.add_patch(plt.Rectangle((cart_x - cart_width/2, -cart_height/2), cart_width, cart_height, color='blue'))
+        
+        # Draw the horizontal line
+        ax.axhline(y=0, color='k',lw=3)
+
+        # Draw the pole
+        ax.plot([cart_x, pole_x], [0, pole_y], color='red', lw=3)
+        ax.plot(cart_x, 0, 'ko')  # Draw the cart axle
+        ax.set_axis_off()
+        ax.set_aspect('equal')
+        ax.set_xlim(-1.5, 1.5)
+        ax.set_ylim(-1.3, 1.3)
+
+    def close(self):
+        plt.close()
+
+
 if __name__ == '__main__':
 
     env = frozen_lake()
