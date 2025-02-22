@@ -13,6 +13,7 @@ from .viz import viz
 #                                         @ZF  #
 ################################################
 
+# 网格布局
 layout = [
     "S.......",
     "........",
@@ -34,6 +35,7 @@ class frozen_lake:
         self.rng = np.random.RandomState(seed)
         self.layout = layout
         self.get_occupancy()
+        # eps: 执行任务的随机性, slippery rate
         self.eps = eps 
         self.Rscale = Rscale
         # define MDP 
@@ -53,13 +55,17 @@ class frozen_lake:
         }
         self.occupancy = np.array([list(map(lambda x: map_dict[x], row)) 
                                    for row in self.layout])
+        # 以下数组均存储这些特殊点的坐标
+        # hstack，把数组在水平方向上连接，用这个因为只有一个goal/current
         self.goal = np.hstack(np.where(np.array([list(row) 
                         for row in self.layout])=='G'))
         self.curr_cell = np.hstack(np.where(np.array([list(row) 
                         for row in self.layout])=='S'))
+        # hole多个为了保留二维性，使用vstack
         holes = np.array([list(row) for row in self.layout])=='H'
         self.hole_cells = [h for h in np.vstack(np.where(holes)).T]
-        
+    
+    # cell表示[row, col], state表示第几个cell（在layout中）
     def cell2state(self, cell):
         return cell[0]*self.occupancy.shape[1] + cell[1]
     
@@ -71,6 +77,8 @@ class frozen_lake:
 
     def _init_S(self):
         '''Define the state space
+        nS: number of states
+        S:  state [0,1,2,3,..., nS-1]
         '''
         self.nS = frozen_lake.n_row*frozen_lake.n_col
         self.S  = list(range(self.nS))
@@ -99,6 +107,7 @@ class frozen_lake:
         '''
 
         def p_s_next(s, a):
+            # 状态空间内下一步各个状态的prob，存储于p_next中
             p_next = np.zeros([self.nS])
             cell = self.state2cell(s)
             # if the current state is terminal state
@@ -107,6 +116,7 @@ class frozen_lake:
                 p_next[s] = 1 
             else:
                 for j in self.A:
+                    # np.clip限制参数范围：np.clip(a, a_min, a_max)
                     s_next = self.cell2state(
                         np.clip(cell + self.directs[j],
                         0, frozen_lake.n_row-1))
@@ -159,17 +169,22 @@ class frozen_lake:
         '''Visualize the current environment
         '''
         occupancy = np.array(self.occupancy)
+        # 使用 seaborn 的 heatmap 函数绘制网格
+        # cmap为颜色映射
         sns.heatmap(occupancy, cmap=viz.mixMap, ax=ax,
                     vmin=0, vmax=1, 
                     lw=.5, linecolor=[.9]*3, cbar=False)
+        # 绘制网格的边界线
         ax.axhline(y=0, color='k',lw=5)
         ax.axhline(y=occupancy.shape[0], color='k',lw=5)
         ax.axvline(x=0, color='k',lw=5)
         ax.axvline(x=occupancy.shape[1], color='k',lw=5)
+        # 绘制目标和当前位置
         ax.text(self.goal[1]+.15, self.goal[0]+.75, 'G', color=viz.Red,
                     fontweight='bold', fontsize=10)
         ax.text(self.curr_cell[1]+.25, self.curr_cell[0]+.75, 'O', color=viz.Red,
                     fontweight='bold', fontsize=10)
+        # 获取当前状态
         r, _ = self.r(self.state)
         title = f'Episode: {epi}, Step: {step}' if epi else f'Reward: {r}, done: {self.done}' 
         ax.set_title(title)
@@ -188,6 +203,7 @@ class frozen_lake:
                     pa = pi[s, a]
                     if pa > 0:
                         next_cell = self.directs[a]*.25
+                        # 绘制箭头 ax.arrow(start, dir&length, width&color)
                         ax.arrow(cell[1]+.5, cell[0]+.5, 
                                 next_cell[1]*pa, next_cell[0]*pa,
                                 width=.005, color='k')
@@ -219,9 +235,12 @@ class frozen_lake:
     def step(self, act):
         '''Update the state of the environment
         '''
+        # 获得transition
         p_s_next = self.p_s_next(self.state, act)
+        # 根据状态转移概率分布随机选择下一个状态
         self.state = self.rng.choice(self.S, p=p_s_next)
         self.curr_cell = self.state2cell(self.state)
+        # 根据新的状态计算奖励和是否终止
         rew, self.done = self.r(self.state)
         self.act = None 
         return self.state, rew, self.done
