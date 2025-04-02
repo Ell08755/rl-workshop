@@ -252,17 +252,17 @@ class cart_pole:
         # Physical constants
         self.dt = dt                # time step (s)
         self.gravity = gravity      # gravitational constant
-        self.mass_cart = mass_cart  # mass of the cart (kg)
-        self.mass_pole = mass_pole  # mass of the pole (kg)
+        self.mass_cart = mass_cart  # mass of the cart (kg), 小车质量
+        self.mass_pole = mass_pole  # mass of the pole (kg), 杆子质量
         self.length = length        # length of the pole (m)
-        self.force_mag = force_mag  # maximum magnitude of the force (N)
+        self.force_mag = force_mag  # maximum magnitude of the force (N)，最大允许施加的力
         self.tau = tau  # time interval for the simulation (s)
 
         # State variables
-        self.state = np.zeros(4)  # [x, x_dot, theta, theta_dot]
+        self.state = np.zeros(4)  # [x 位置, x_dot 位置速度, theta 杆角度, theta_dot 杆角度速度]
         self.nS = 4
         
-        # The action space is continuous: force magnitude between -1 and 1
+        # The action space is continuous: force magnitude between -1 and 1 连续浮点数
         # We will apply the action to force the cart to move
         self.action_space = (-1.0, 1.0)
         
@@ -270,12 +270,13 @@ class cart_pole:
         # Reset the state to a random initial position and velocity
         self.state = np.random.uniform(low=-0.05, high=0.05, size=4)  # Random initial state
         return np.copy(self.state), 0, False
+        # 状态 奖励 是否终止
     
     def step(self, action):
         # Extract state variables
         x, x_dot, theta, theta_dot = self.state
         
-        # Apply the continuous action (force between -1 and 1)
+        # Apply the continuous action (force between -1 and 1) 缩放为实际受力
         force = action * self.force_mag
         
         # Physics equations of motion
